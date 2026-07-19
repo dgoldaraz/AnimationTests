@@ -72,3 +72,10 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+Content/__ExternalActors__/*
+Content/__ExternalObjects__/*
+Content/Characters/Mannequins/Anims/*
+Content/Characters/Mannequins/Materials/*
+Content/Characters/Mannequins/Meshes/*
+Content/Characters/Mannequins/Textures/*
+Content/LevelPrototyping/*
