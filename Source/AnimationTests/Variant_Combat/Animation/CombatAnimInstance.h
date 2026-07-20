@@ -32,10 +32,19 @@ public:
 	
 	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
 	
+	// Store if player it's attacking
 	bool bIsAttacking = false;
+	// Current Yaw rotation
 	float YawDelta = 0.0f;
+	// Horizontal Velocity
 	float HorizontalVelocity = 0.0f;
-	
+};
+
+UENUM(BlueprintType)
+enum class ELeanType : uint8
+{
+	BasicInterpolation,
+	UseTurnRate,
 };
 
 UCLASS()
@@ -47,23 +56,29 @@ class ANIMATIONTESTS_API UCombatAnimInstance : public UAnimInstance
 	FProxyCombatGameplayData* GetControlRigProxyOnGameThread() { return &GetProxyOnGameThread <FProxyCombatGameplayData>(); }
 	
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
+	
 protected:
 
 	// Create custom Proxy
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 	
 	// Define how much we should Lean
+	UPROPERTY(BlueprintReadOnly)
 	float LeanValue = 0.0f;
+	
+	// Lean Type
+	UPROPERTY(EditAnywhere, Category = "Lean")
+	ELeanType LeanType = ELeanType::BasicInterpolation;
 	
 	// Clamp rotation based on this float. This float controls how quickly the character reaches the Max Lean.
 	UPROPERTY(EditAnywhere, Category = "Lean")
 	float LeanClamp = 300.0f;
 	
-	// Blend lean based on this value. This value defines when Lean will be applied (smoothly) based on Horizontal Speed
-	UPROPERTY(EditAnywhere, Category = "Lean")
-	float LeanBlend = 200.0f;
-	
 	// Speed of blend when calculating rotation, so sudden changes of rotation doesn't drive animation too hard
 	UPROPERTY(EditAnywhere, Category = "Lean")
-	float RotationBlendSpeed = 6.0f;
+	float LeanBlendSpeed = 6.0f;
+	
+	// Maximum expected turn rate
+	UPROPERTY(EditAnywhere, Category = "Lean")
+	float MaxTurnRate = 600.0f;
 };
