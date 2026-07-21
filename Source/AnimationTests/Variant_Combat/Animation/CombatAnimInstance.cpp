@@ -27,44 +27,55 @@ void UCombatAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
 	
-	if (FProxyCombatGameplayData* proxyData = GetControlRigProxyOnGameThread())
+	// Not lean on attacks
+	if (!ProxyCombatGameplayData.bIsAttacking)
 	{
 		// Calculate variables based on proxy
 		// Calculate Lean based on proxy values
 		
-
-		
-		float SpeedFactor = FMath::Clamp(proxyData->HorizontalVelocity / LeanClamp, 0.0f, 1.0f);
-		switch (LeanType)
+		float SpeedFactor = FMath::Clamp(ProxyCombatGameplayData.HorizontalVelocity / LeanClamp, 0.0f, 1.0f);
+		if (SpeedFactor > 0.0f)
 		{
-		case ELeanType::UseTurnRate:
+			switch (LeanType)
 			{
-				// YawDelta is difference per frame, conver it into degrees per second
-				float TurnRate = proxyData->YawDelta / DeltaSeconds;
-				// Normalize target lean based on MaxTurnValue, so we can use a [-1,1] blendspace
-				float TargetLean = TurnRate / MaxTurnRate;
-				TargetLean *= SpeedFactor;
-				TargetLean = FMath::Clamp(TargetLean, -1.0, 1.0f);
-				LeanValue = FMath::FInterpTo(LeanValue, TargetLean, DeltaSeconds, LeanBlendSpeed);
-				// If YawDelta is too noisy, we can smooth it like
-				// SmoothedTurnRate = FMath::FInterpTo(SmoothedTurnRate,TurnRate,DeltaTime,15.f);
-				break;
-			}
-		default:
-		case ELeanType::BasicInterpolation:
-			{
-				// Use YawDelta based on speed (more speed more lean)
-				// If yaw delta is too noisy, can be smooth with FInterpTo
-				// Lerp changes
-				float TargetLean = FMath::Clamp(proxyData->YawDelta * SpeedFactor, -1.0f, 1.0f);
-				LeanValue = FMath::FInterpTo(LeanValue, TargetLean, DeltaSeconds, LeanBlendSpeed);
-				break;
+			case ELeanType::UseTurnRate:
+				{
+					// YawDelta is difference per frame, conver it into degrees per second
+					float TurnRate = ProxyCombatGameplayData.YawDelta / DeltaSeconds;
+					// Normalize target lean based on MaxTurnValue, so we can use a [-1,1] blendspace
+					float TargetLean = TurnRate / MaxTurnRate;
+					TargetLean *= SpeedFactor;
+					TargetLean = FMath::Clamp(TargetLean, -1.0, 1.0f);
+					LeanValue = FMath::FInterpTo(LeanValue, TargetLean, DeltaSeconds, LeanBlendSpeed);
+					// If YawDelta is too noisy, we can smooth it like
+					// SmoothedTurnRate = FMath::FInterpTo(SmoothedTurnRate,TurnRate,DeltaTime,15.f);
+					break;
+				}
+			default:
+			case ELeanType::BasicInterpolation:
+				{
+					// Use YawDelta based on speed (more speed more lean)
+					// If yaw delta is too noisy, can be smooth with FInterpTo
+					// Lerp changes
+					float TargetLean = FMath::Clamp(ProxyCombatGameplayData.YawDelta * SpeedFactor, -1.0f, 1.0f);
+					LeanValue = FMath::FInterpTo(LeanValue, TargetLean, DeltaSeconds, LeanBlendSpeed);
+					break;
+				}
 			}
 		}
+	}
+	else
+	{
+		LeanValue = FMath::FInterpTo(LeanValue, 0.0f, DeltaSeconds, LeanBlendSpeed);
 	}
 }
 
 FAnimInstanceProxy* UCombatAnimInstance::CreateAnimInstanceProxy()
 {
-	return new FProxyCombatGameplayData(this);
+	return &ProxyCombatGameplayData;
+}
+
+void UCombatAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy)
+{
+	// Don't do anything as we don't want to destroy proxy
 }

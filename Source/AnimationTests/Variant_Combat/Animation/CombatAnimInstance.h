@@ -51,17 +51,16 @@ UCLASS()
 class ANIMATIONTESTS_API UCombatAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-	
-	// Return Custom Proxy
-	FProxyCombatGameplayData* GetControlRigProxyOnGameThread() { return &GetProxyOnGameThread <FProxyCombatGameplayData>(); }
+public:
 	
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 	
-protected:
-
-	// Create custom Proxy
-	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
+private:
 	
+	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
+	virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy) override;
+	
+protected:
 	// Define how much we should Lean
 	UPROPERTY(BlueprintReadOnly)
 	float LeanValue = 0.0f;
@@ -81,4 +80,8 @@ protected:
 	// Maximum expected turn rate
 	UPROPERTY(EditAnywhere, Category = "Lean")
 	float MaxTurnRate = 600.0f;
+	
+private:
+	// Create custom proxy
+	FProxyCombatGameplayData ProxyCombatGameplayData;
 };
