@@ -21,7 +21,10 @@ public class AnimationTests : ModuleRules
 			"Slate"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"AnimGraphRuntime"
+		});
 
 		PublicIncludePaths.AddRange(new string[] {
 			"AnimationTests",
@@ -39,6 +42,18 @@ public class AnimationTests : ModuleRules
 			"AnimationTests/Variant_SideScrolling/Interfaces",
 			"AnimationTests/Variant_SideScrolling/UI"
 		});
+
+		// Easy way to test AnimGraph Nodes on Editor
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[]
+			{
+				"UnrealEd",
+				"AnimGraph",
+				"BlueprintGraph"
+			});
+		}
+		
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
