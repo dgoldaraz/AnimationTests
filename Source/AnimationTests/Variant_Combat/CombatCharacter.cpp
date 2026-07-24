@@ -2,6 +2,7 @@
 
 
 #include "CombatCharacter.h"
+#include "CombatCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -16,6 +17,7 @@
 #include "Engine/LocalPlayer.h"
 #include "CombatPlayerController.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MotionWarpingComponent.h"
 
 ACombatCharacter::ACombatCharacter()
 {
@@ -50,6 +52,9 @@ ACombatCharacter::ACombatCharacter()
 
 	// set the player tag
 	Tags.Add(FName("Player"));
+	
+	// Motion Warping
+	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>("MotionWarpingComponent");
 }
 
 void ACombatCharacter::Tick(float DeltaSeconds)
@@ -106,6 +111,17 @@ void ACombatCharacter::ToggleCamera()
 {
 	// call the BP hook
 	BP_ToggleCamera();
+}
+
+void ACombatCharacter::AssassinationAttackPressed()
+{
+	if (IsValid(AssassinationAttackMontage))
+	{
+		// Do warp calculations
+		
+		// Play montage
+		PlayAnimMontage(AssassinationAttackMontage);
+	}
 }
 
 void ACombatCharacter::DoMove(float Right, float Forward)
@@ -550,6 +566,9 @@ void ACombatCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// Camera Side Toggle
 		EnhancedInputComponent->BindAction(ToggleCameraAction, ETriggerEvent::Triggered, this, &ACombatCharacter::ToggleCamera);
+		
+		// Assassination Attack
+		EnhancedInputComponent->BindAction(AssassinationAction, ETriggerEvent::Started, this, &ACombatCharacter::AssassinationAttackPressed);
 	}
 }
 

@@ -15,6 +15,7 @@ class UInputAction;
 struct FInputActionValue;
 class UCombatLifeBar;
 class UWidgetComponent;
+class UMotionWarpingComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogCombatCharacter, Log, All);
 
@@ -42,6 +43,9 @@ class ACombatCharacter : public ACharacter, public ICombatAttacker, public IComb
 	/** Life bar widget component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* LifeBar;
+	
+	/** Motion Warping */
+	TObjectPtr<UMotionWarpingComponent> MotionWarpingComponent;
 	
 protected:
 
@@ -189,7 +193,17 @@ protected:
 	FRotator LastRotation = FRotator::ZeroRotator;
 	// Rotation delta difference from prev tick to current
 	FRotator DeltaRotation = FRotator::ZeroRotator;
-
+	
+	// Assassination Warp attack
+	
+	/** Assassination Attack Input Action */
+	UPROPERTY(EditAnywhere, Category ="Input")
+	UInputAction* AssassinationAction;
+	
+	/** AnimMontage that will play for Assasination attacks */
+	UPROPERTY(EditAnywhere, Category="Melee Attack|Combo")
+	UAnimMontage* AssassinationAttackMontage;
+	
 public:
 	
 	/** Constructor */
@@ -231,6 +245,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="Combat")
 	void BP_ToggleCamera();
 
+	/** Called for assassination attack input */
+	void AssassinationAttackPressed();
+	
 public:
 
 	/** Handles move inputs from either controls or UI interfaces */
